@@ -10,6 +10,19 @@ namespace HubSpot.NET.Examples
     {
         public static void Example(HubSpotApi api)
         {
+            try
+            {
+                Tests(api);
+                Console.WriteLine("Deals tests completed successfully!");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Deals tests failed!");
+                Console.WriteLine(ex.ToString());
+            }
+        }
+        private static void Tests(HubSpotApi api)
+        {
             /**
              * Create a deal
              */
@@ -70,7 +83,7 @@ namespace HubSpot.NET.Examples
             /**
              * Get all deals
              */
-            var deals = api.Deal.List<DealHubSpotModel>(false,
+            var deals = api.Deal.List(false,
                 new ListRequestOptions(250) { PropertiesToInclude = new List<string> { "dealname", "amount" } });
 
             /**
@@ -96,7 +109,7 @@ namespace HubSpot.NET.Examples
             var currentdatetime = DateTime.SpecifyKind(DateTime.Now.AddDays(-7), DateTimeKind.Utc);
             var since = ((DateTimeOffset)currentdatetime).ToUnixTimeMilliseconds().ToString();
 
-            var recentlyCreatedDeals = api.Deal.RecentlyCreated<DealHubSpotModel>(new DealRecentRequestOptions
+            var recentlyCreatedDeals = api.Deal.RecentlyCreated(new DealRecentRequestOptions
             {
                 Limit = 10,
                 IncludePropertyVersion = false,

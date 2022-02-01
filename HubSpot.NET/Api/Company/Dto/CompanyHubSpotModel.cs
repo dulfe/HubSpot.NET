@@ -36,26 +36,9 @@ namespace HubSpot.NET.Api.Company.Dto
         [DataMember(Name = "country")]
         public string Country { get; set; }
 
-        [DataMember(Name = "createdAt")]
-        [IgnoreDataMember]
-        public DateTime? CreatedAt { get; set; }
-
-        [DataMember(Name = "updatedAt")]
-        [IgnoreDataMember]
-        public DateTime? UpdatedAt { get; set; }
-
-        public string RouteBasePath => "/companies/v2";
         public bool IsNameValue => true;
 
         [IgnoreDataMember]
         public CompanyHubSpotAssociations Associations { get; }
-
-        public virtual void ToHubSpotDataEntity(ref dynamic converted)
-        {
-        }
-
-        public virtual void FromHubSpotDataEntity(dynamic hubspotData)
-        {
-        }
     }
 }

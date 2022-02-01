@@ -1,3 +1,4 @@
+using HubSpot.NET.Api.OAuth.Dto;
 using System;
 using System.Net;
 using System.Runtime.Serialization;
@@ -30,8 +31,12 @@ namespace HubSpot.NET.Core
         }
 
         public HubSpotException(string message, HubSpotError error) : this(message)
+        { }
+
+        public HubSpotException(string message, HubSpotError error, string responseContent) : base(message)
         {
             ReturnedError = error;
+            RawJsonResponse = responseContent;
         }
 
         public HubSpotException(string message, HubSpotError error, string responseContent) : this(message, error)

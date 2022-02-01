@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using HubSpot.NET.Core;
 
 namespace HubSpot.NET.Examples
@@ -7,16 +8,30 @@ namespace HubSpot.NET.Examples
     {
         public static void Example(HubSpotApi api)
         {
+            try
+            {
+                Tests(api);
+                Console.WriteLine("Email Subscriptions tests passed.");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine("Email Subscriptions tests failed!");
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        private static void Tests(HubSpotApi api)
+        {
            /**
              * Get the available subscription types
              */
-            var all = api.EmailSubscriptions.GetEmailSubscriptionTypes();
+            var all = api.EmailSubscriptions.GetSubscriptionTypes();
 
             /**
              * Get the subscription statuses for the given email address
              * A missing type implies that they have not opted out
              */
-            var john = api.EmailSubscriptions.GetStatus("john@squaredup.com");
+            //var john = api.EmailSubscriptions.GetSubscriptionStatusForContact("john@squaredup.com");
 
             api.EmailSubscriptions.SubscribeTo("john@squaredup.com", all.Types.First().Id, "LEGITIMATE_INTEREST_CLIENT", "Signed Up.");
 
@@ -24,7 +39,7 @@ namespace HubSpot.NET.Examples
              * Unsubscribe a user from ALL emails
              * WARNING: You cannot undo this
              */
-            api.EmailSubscriptions.UnsubscribeAll("john@squaredup.com");
+           // api.EmailSubscriptions.UnsubscribeAll("john@squaredup.com");
 
 
             /**
@@ -32,8 +47,9 @@ namespace HubSpot.NET.Examples
              * WARNING: You cannot undo this
              */
             var type = all.Types.First();
-            api.EmailSubscriptions.UnsubscribeFrom("dan@squaredup.com", type.Id);
+           // api.EmailSubscriptions.UnsubscribeFrom("dan@squaredup.com", type.Id);
 
+            api.EmailSubscriptions.SubscribeTo("dev@vtrpro.com", type.Id);
         }
     }
 }

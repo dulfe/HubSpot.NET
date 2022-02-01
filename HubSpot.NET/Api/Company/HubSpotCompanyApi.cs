@@ -4,15 +4,25 @@ namespace HubSpot.NET.Api.Company
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
-    using Flurl;
     using HubSpot.NET.Api.Company.Dto;
     using HubSpot.NET.Core;
+    using HubSpot.NET.Core.Abstracts;
     using HubSpot.NET.Core.Interfaces;
     using RestSharp;
 
-    public class HubSpotCompanyApi : IHubSpotCompanyApi
+    public class HubSpotCompanyApi : HubSpotCompanyApi<CompanyHubSpotModel>, IHubSpotCompanyApi
+    {
+        public HubSpotCompanyApi(IHubSpotClient client)
+            :base (client)
+        {
+        }
+    }
+
+	public class HubSpotCompanyApi<TCompany> : ApiRoutable, IHubSpotCompanyApi<TCompany>
+        where TCompany : CompanyHubSpotModel, new()
     {
         private readonly IHubSpotClient _client;
+        public override string MidRoute => "/companies/v2";
 
         public HubSpotCompanyApi(IHubSpotClient client)
         {
@@ -26,27 +36,23 @@ namespace HubSpot.NET.Api.Company
         /// <param name="entity">The entity</param>
         /// <returns>The created entity (with ID set)</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public T Create<T>(T entity) where T : CompanyHubSpotModel, new()
-        {
-            var path = $"{entity.RouteBasePath}/companies";
-
-            return _client.Execute<T>(path, entity, Method.POST);
-        }
+        public TCompany Create(TCompany entity)
+            => _client.Execute<TCompany, TCompany>(GetRoute<TCompany>("companies"), entity, Method.POST);
 
         /// <summary>
         /// Gets a specific company by it's ID
         /// </summary>
         /// <typeparam name="T">Implementation of CompanyHubSpotModel</typeparam>
         /// <param name="companyId">The ID</param>
-        /// <returns>The company entity or null if the company does not exist</returns>
-        public T GetById<T>(long companyId) where T : CompanyHubSpotModel, new()
+        /// <returns>The company entity or null if the company does not exist.</returns>
+        public TCompany GetById(long companyId)
         {
-            var path =  $"{new T().RouteBasePath}/companies/{companyId}";
-
             try
             {
-                return _client.Execute<T>(path, Method.GET);
-             }
+                var _data = _client.Execute<TCompany>(GetRoute<TCompany>("companies", companyId.ToString()));
+
+                return _data;
+            }
             catch (HubSpotException exception)
             {
                 if (exception.ReturnedError.StatusCode == HttpStatusCode.NotFound)
@@ -61,54 +67,43 @@ namespace HubSpot.NET.Api.Company
         /// <typeparam name="T">Implementation of CompanyHubSpotModel</typeparam>
         /// <param name="domain">Domain name to search for</param>
         /// <param name="options">Set of search options</param>
-        /// <returns>The company entity or null if the company does not exist</returns>
-        public CompanySearchResultModel<T> GetByDomain<T>(string domain, CompanySearchByDomain options = null) where T : CompanyHubSpotModel, new()
+        /// <returns>The company entity or null if the company does not exist.</returns>
+        public CompanySearchResultModel<TCompany> GetByDomain(string domain, CompanySearchByDomain opts = null)
         {
-            if (options == null)
-            {
-                options = new CompanySearchByDomain();
-            }
+            opts = opts ?? new CompanySearchByDomain();
 
-            var path =  $"{new CompanyHubSpotModel().RouteBasePath}/domains/{domain}/companies";
+            var path = GetRoute<TCompany>("domains", domain, "companies");
 
             try
             {
+                var data = _client.Execute<CompanySearchResultModel<TCompany>, CompanySearchByDomain>(path, opts, Method.POST);
 
-                var data = _client.ExecuteList<CompanySearchResultModel<T>>(path, options, Method.POST);
-
-                return data;
-             }
+                return data;            }
             catch (HubSpotException exception)
-            {
+        {
                 if (exception.ReturnedError.StatusCode == HttpStatusCode.NotFound)
                     return null;
                 throw;
             }
         }
 
-        public CompanyListHubSpotModel<T> List<T>(ListRequestOptions opts = null) where T: CompanyHubSpotModel, new()
+        public CompanyListHubSpotModel<TCompany> List(ListRequestOptions opts = null)
         {
-            if (opts == null)
-            {
-                opts = new ListRequestOptions();
-            }
+            opts = opts ?? new ListRequestOptions();
 
-            var path = $"{new CompanyHubSpotModel().RouteBasePath}/companies/paged"
-                .SetQueryParam("count", opts.Limit);
+            string path = GetRoute<CompanyHubSpotModel>("companies", "paged");
+
+            path += $"{QueryParams.COUNT}={opts.Limit}";
 
             if (opts.PropertiesToInclude.Any())
-            {
-                path.SetQueryParam("properties", opts.PropertiesToInclude);
-            }
+                path += $"{QueryParams.PROPERTIES}={opts.PropertiesToInclude}";
 
             if (opts.Offset.HasValue)
-            {
-                path = path.SetQueryParam("offset", opts.Offset);
-            }
+                path += $"{QueryParams.OFFSET}={opts.Offset}";
 
-            var data = _client.ExecuteList<CompanyListHubSpotModel<T>>(path);
-
+            var data = _client.Execute<CompanyListHubSpotModel<TCompany>, ListRequestOptions>(path, opts);
             return data;
+
         }
 
         /// <summary>
@@ -117,18 +112,12 @@ namespace HubSpot.NET.Api.Company
         /// <typeparam name="T">Implementation of CompanyHubSpotModel</typeparam>
         /// <param name="entity">The company entity</param>
         /// <returns>The updated company entity</returns>
-        public T Update<T>(T entity) where T : CompanyHubSpotModel, new()
+        public TCompany Update(TCompany entity)
         {
             if (entity.Id < 1)
-            {
                 throw new ArgumentException("Company entity must have an id set!");
-            }
 
-            var path = $"{entity.RouteBasePath}/companies/{entity.Id}";
-
-            var data = _client.Execute<T>(path, entity, Method.PUT);
-
-            return data;
+            return _client.Execute<TCompany, TCompany>(GetRoute<TCompany>("companies", entity.Id.ToString()), entity, Method.PUT);
         }
 
         /// <summary>
@@ -136,13 +125,9 @@ namespace HubSpot.NET.Api.Company
         /// </summary>
         /// <param name="companyId">ID of the company</param>
         public void Delete(long companyId)
-        {
-            var path = $"{new CompanyHubSpotModel().RouteBasePath}/companies/{companyId}";
+            => _client.ExecuteOnly(GetRoute<TCompany>("companies", companyId.ToString()), method: Method.DELETE);
 
-            _client.Execute(path, method: Method.DELETE);
-        }
-
-        public CompanySearchHubSpotModel<T> Search<T>(SearchRequestOptions opts = null) where T : CompanyHubSpotModel, new()
+        public CompanySearchHubSpotModel<TCompany> Search(SearchRequestOptions opts = null)
         {
             if (opts == null)
             {
@@ -161,7 +146,7 @@ namespace HubSpot.NET.Api.Company
         /// </summary>
         /// <typeparam name="T">Implementation of <see cref="CompanyHubSpotModel"/></typeparam>
         /// <param name="entity">The deal to get associations for</param>
-        public T GetAssociations<T>(T entity) where T : CompanyHubSpotModel, new()
+        public TCompany GetAssociations(TCompany entity)
         {
             // see https://legacydocs.hubspot.com/docs/methods/crm-associations/crm-associations-overview
             var companyPath = $"/crm-associations/v1/associations/{entity.Id}/HUBSPOT_DEFINED/6";
