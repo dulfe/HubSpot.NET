@@ -33,12 +33,6 @@ namespace HubSpot.NET.Core
         public HubSpotException(string message, HubSpotError error) : this(message)
         { }
 
-        public HubSpotException(string message, HubSpotError error, string responseContent) : base(message)
-        {
-            ReturnedError = error;
-            RawJsonResponse = responseContent;
-        }
-
         public HubSpotException(string message, HubSpotError error, string responseContent) : this(message, error)
         {
             RawJsonResponse = responseContent;

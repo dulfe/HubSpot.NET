@@ -3,6 +3,9 @@ using HubSpot.NET.Api.Deal.Dto;
 
 namespace HubSpot.NET.Core.Interfaces
 {
+    public interface IHubSpotDealApi : IHubSpotDealApi<DealHubSpotModel>
+    {
+    }
     public interface IHubSpotDealApi<T> : ICRUDable<T>
         where T : DealHubSpotModel, IHubSpotModel, new()
     {

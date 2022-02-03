@@ -45,7 +45,7 @@ namespace HubSpot.NET.Examples
             /**
              * Search for a deal
              */
-            var searchedDeal = api.Deal.Search<DealHubSpotModel>(new SearchRequestOptions()
+            var searchedDeal = api.Deal.Search(new SearchRequestOptions()
             {
                 FilterGroups = new List<SearchRequestFilterGroup>
                 {
@@ -121,7 +121,7 @@ namespace HubSpot.NET.Examples
              *  Will default to 30 day if Since is not set.
              *  Using DealRecentListHubSpotModel to accomodate deals returning in the "results" property.
              */
-            var recentlyUpdatedDeals = api.Deal.RecentlyUpdated<DealHubSpotModel>(new DealRecentRequestOptions
+            var recentlyUpdatedDeals = api.Deal.RecentlyUpdated(new DealRecentRequestOptions
             {
                 Limit = 10,
                 IncludePropertyVersion = false,

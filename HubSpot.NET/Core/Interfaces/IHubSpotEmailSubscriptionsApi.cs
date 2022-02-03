@@ -27,11 +27,6 @@ namespace HubSpot.NET.Core.Interfaces
         /// </summary>
         /// <param name="email">The email of the contact unsubscribing</param>
         SubscriptionTypeHubSpotModel GetSubscription(long id);
-        /// <summary>
-        /// Unsubscribe the given email address from ALL email
-        /// WARNING: There is no UNDO for this operation
-        /// </summary>
-        /// <param name="email"></param>
         void UnsubscribeAll(string email);
         /// <summary>
         ///     Unsubscribe the given email address from the given subscription type

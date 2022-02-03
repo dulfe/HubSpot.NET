@@ -1,21 +1,28 @@
 ﻿namespace HubSpot.NET.Api.Deal
 {
-    using System;
-	using System.Linq;
-    using System.Net;
-    using Flurl;
     using HubSpot.NET.Api.Deal.Dto;
     using HubSpot.NET.Api.Shared;
     using HubSpot.NET.Core;
     using HubSpot.NET.Core.Abstracts;
     using HubSpot.NET.Core.Interfaces;
     using RestSharp;
+    using System;
+	using System.Collections.Generic;
+	using System.Linq;
+    using System.Net;
 
-    public class HubSpotDealApi : ApiRoutable, IHubSpotDealApi
+    public class HubSpotDealApi : HubSpotDealApi<DealHubSpotModel>, IHubSpotDealApi
+    {
+        public HubSpotDealApi(IHubSpotClient client)
+            : base(client)
+        { }
+    }
+
+    public class HubSpotDealApi<TDeal> : ApiRoutable, IHubSpotDealApi<TDeal>
+        where TDeal : DealHubSpotModel, new()
     {
         private readonly IHubSpotClient _client;
         public override string MidRoute => "/deals/v1";
-
         public HubSpotDealApi(IHubSpotClient client)
         {
             _client = client;
@@ -28,12 +35,12 @@
         /// <typeparam name="T">Implementation of DealHubSpotModel</typeparam>
         /// <param name="entity">The entity</param>
         /// <returns>The created entity (with ID set)</returns>
-        public DealHubSpotModel Create(DealHubSpotModel entity)
+        public TDeal Create(TDeal entity)
         {
-            NameTransportModel<DealHubSpotModel> model = new NameTransportModel<DealHubSpotModel>();
+            NameTransportModel<TDeal> model = new NameTransportModel<TDeal>();
             model.ToPropertyTransportModel(entity);
 
-            return _client.Execute<DealHubSpotModel,NameTransportModel<DealHubSpotModel>>(GetRoute<DealHubSpotModel>(), model, Method.POST);
+            return _client.Execute<TDeal, NameTransportModel<TDeal>>(GetRoute<TDeal>(), model, Method.POST);
         }
 
         /// <summary>
@@ -42,11 +49,11 @@
         /// <param name="dealId">ID of the deal</param>
         /// <typeparam name="T">Implementation of DealHubSpotModel</typeparam>
         /// <returns>The deal entity or null if the deal does not exist.</returns>
-        public DealHubSpotModel GetById(long dealId)
+        public TDeal GetById(long dealId)
         {
             try
             {
-                return _client.Execute<DealHubSpotModel>(GetRoute<DealHubSpotModel>(dealId.ToString()));
+                return _client.Execute<TDeal>(GetRoute<TDeal>(dealId.ToString()));
             }
             catch (HubSpotException exception)
             {
@@ -62,12 +69,15 @@
         /// <typeparam name="T">Implementation of DealHubSpotModel</typeparam>
         /// <param name="entity">The deal entity</param>
         /// <returns>The updated deal entity</returns>
-        public DealHubSpotModel Update(DealHubSpotModel entity)
+        public TDeal Update(TDeal entity)
         {
             if (entity.Id < 1)
                 throw new ArgumentException("Deal entity must have an id set!");
 
-            return _client.Execute<DealHubSpotModel, DealHubSpotModel>(GetRoute<DealHubSpotModel>(entity.Id.ToString()), entity, method: Method.PUT);            
+            NameTransportModel<TDeal> model = new NameTransportModel<TDeal>();
+            model.ToPropertyTransportModel(entity);
+
+            return _client.Execute<TDeal, NameTransportModel<TDeal>>(GetRoute<TDeal>(entity.Id.ToString()), model, method: Method.PUT);
         }
 
         /// <summary>
@@ -76,23 +86,24 @@
         /// <typeparam name="T">Implementation of DealListHubSpotModel</typeparam>
         /// <param name="opts">Options (limit, offset) relating to request</param>
         /// <returns>List of deals</returns>
-        public DealListHubSpotModel<DealHubSpotModel> List(bool includeAssociations, ListRequestOptions opts = null)
+        public DealListHubSpotModel<TDeal> List(bool includeAssociations, ListRequestOptions opts = null)
         {
-            opts = opts ?? new ListRequestOptions(250);         
+            opts = opts ?? new ListRequestOptions(250);
 
-            Url path = GetRoute<DealListHubSpotModel<DealHubSpotModel>>("deal", "paged").SetQueryParam("limit", opts.Limit);
+            string path = GetRoute<DealListHubSpotModel<TDeal>>("deal", "paged");
+
+            path += $"{QueryParams.LIMIT}={opts.Limit}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("offset", opts.Offset);
+                path += $"{QueryParams.OFFSET}={opts.Offset}";
 
             if (includeAssociations)
-                path = path.SetQueryParam("includeAssociations", "true");
+                path += $"{QueryParams.INCLUDE_ASSOCIATIONS}=true";
 
             if (opts.PropertiesToInclude.Any())
-                path = path.SetQueryParam("properties", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTIES}={opts.PropertiesToInclude}";
 
-            var data = _client.Execute<DealListHubSpotModel<DealHubSpotModel>, ListRequestOptions>(path, opts);
-            return data;
+            return _client.Execute<DealListHubSpotModel<TDeal>, ListRequestOptions>(path, opts);
         }
 
         /// <summary>
@@ -104,23 +115,24 @@
         /// <param name="objectName">String name of Hubspot object related to deals (contact\account)</param>
         /// <param name="opts">Options (limit, offset) relating to request</param>
         /// <returns>List of deals</returns>
-        public DealListHubSpotModel<DealHubSpotModel> ListAssociated(bool includeAssociations, long hubId, ListRequestOptions opts = null, string objectName = "contact")
+        public DealListHubSpotModel<TDeal> ListAssociated(bool includeAssociations, long hubId, ListRequestOptions opts = null, string objectName = "contact")
         {
-            opts = opts ?? new ListRequestOptions();            
+            opts = opts ?? new ListRequestOptions();
 
-            Url path = $"{GetRoute<DealListHubSpotModel<DealHubSpotModel>>()}/deal/associated/{objectName}/{hubId}/paged"
-                .SetQueryParam("limit", opts.Limit);
+            string path = GetRoute<DealListHubSpotModel<TDeal>>("deal", "associated", $"{objectName}", $"{hubId}", "paged");
+
+            path += $"{QueryParams.LIMIT}={opts.Limit}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("offset", opts.Offset);
+                path += $"{QueryParams.OFFSET}={opts.Offset}";
 
             if (includeAssociations)
-                path = path.SetQueryParam("includeAssociations", "true");
+                path += $"{QueryParams.INCLUDE_ASSOCIATIONS}=true";
 
             if (opts.PropertiesToInclude.Any())
-                path = path.SetQueryParam("properties", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTIES}={opts.PropertiesToInclude}";
 
-            return _client.Execute<DealListHubSpotModel<DealHubSpotModel>, ListRequestOptions>(path, opts);
+            return _client.Execute<DealListHubSpotModel<TDeal>, ListRequestOptions>(path, opts);
         }
 
         /// <summary>
@@ -128,7 +140,7 @@
         /// </summary>
         /// <param name="dealId">ID of the deal</param>
         public void Delete(long dealId)
-            => _client.ExecuteOnly(GetRoute<DealHubSpotModel>(dealId.ToString()), method: Method.DELETE);
+            => _client.ExecuteOnly(GetRoute<TDeal>(dealId.ToString()), method: Method.DELETE);
 
         /// <summary>
         /// Gets a list of recently created deals
@@ -136,23 +148,25 @@
         /// <typeparam name="T">Implementation of DealListHubSpotModel</typeparam>
         /// <param name="opts">Options (limit, offset) relating to request</param>
         /// <returns>List of deals</returns>
-        public DealRecentListHubSpotModel<DealHubSpotModel> RecentlyCreated(DealRecentRequestOptions opts = null)
+        public DealRecentListHubSpotModel<TDeal> RecentlyCreated(DealRecentRequestOptions opts = null)
         {
-            opts = opts ?? new DealRecentRequestOptions();            
+            opts = opts ?? new DealRecentRequestOptions();
 
-            Url path = $"{GetRoute<DealRecentListHubSpotModel<DealHubSpotModel>>()}/deal/recent/created"
-                .SetQueryParam("limit", opts.Limit);
+            string path = $"{GetRoute<DealRecentListHubSpotModel<TDeal>>()}/deal/recent/created";
+
+            path += $"{QueryParams.LIMIT}={opts.Limit}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("offset", opts.Offset);
+                path += $"{QueryParams.OFFSET}={opts.Offset}";
 
             if (opts.IncludePropertyVersion)
-                path = path.SetQueryParam("includePropertyVersions", "true");
+                path += $"{QueryParams.INCLUDE_PROPERTY_VERSIONS}=true";
+
 
             if (!string.IsNullOrEmpty(opts.Since))
-                path = path.SetQueryParam("since", opts.Since);
+                path += $"{QueryParams.SINCE}={opts.Since}";
 
-            var data = _client.Execute<DealRecentListHubSpotModel<DealHubSpotModel>, DealRecentRequestOptions>(path, opts);            
+            var data = _client.Execute<DealRecentListHubSpotModel<TDeal>, DealRecentRequestOptions>(path, opts);            
 
             return data;
         }
@@ -163,25 +177,23 @@
         /// <typeparam name="T">Implementation of DealListHubSpotModel</typeparam>
         /// <param name="opts">Options (limit, offset) relating to request</param>
         /// <returns>List of deals</returns>
-        public DealRecentListHubSpotModel<DealHubSpotModel> RecentlyUpdated(DealRecentRequestOptions opts = null)
+        public DealRecentListHubSpotModel<TDeal> RecentlyUpdated(DealRecentRequestOptions opts = null)
         {
-            opts = opts ?? new DealRecentRequestOptions();            
+            opts = opts ?? new DealRecentRequestOptions();
 
-            var path = $"{GetRoute<DealRecentListHubSpotModel<DealHubSpotModel>>()}/deal/recent/modified"
-                .SetQueryParam("limit", opts.Limit);
+            string path = GetRoute<DealRecentListHubSpotModel<TDeal>>("deal", "recent", "modified");
+            path += $"{QueryParams.LIMIT}={opts.Limit}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("offset", opts.Offset);
+                path += $"{QueryParams.OFFSET}={opts.Offset}";
 
             if (opts.IncludePropertyVersion)
-                path = path.SetQueryParam("includePropertyVersions", "true");
+                path += $"{QueryParams.INCLUDE_PROPERTY_VERSIONS}=true";
 
             if (!string.IsNullOrEmpty(opts.Since))
-                path = path.SetQueryParam("since", opts.Since);
+                path += $"{QueryParams.SINCE}={opts.Since}";
 
-            var data = _client.Execute<DealRecentListHubSpotModel<DealHubSpotModel>, DealRecentRequestOptions>(path, opts);
-
-            return data;
+            return _client.Execute<DealRecentListHubSpotModel<TDeal>, DealRecentRequestOptions>(path, opts);
         }
 
         /// <summary>
@@ -190,7 +202,7 @@
         /// <typeparam name="T">Implementation of <see cref="DealHubSpotModel"/></typeparam>
         /// <param name="opts">Options (limit, offset) and search criteria relating to request</param>
         /// <returns>List of deals</returns>
-        public SearchHubSpotModel<T> Search<T>(SearchRequestOptions opts = null) where T : DealHubSpotModel, new()
+        public SearchHubSpotModel<TDeal> Search(SearchRequestOptions opts = null)
         {
             if (opts == null)
             {
@@ -199,7 +211,7 @@
 
             var path = "/crm/v3/objects/deals/search";
 
-            var data = _client.ExecuteList<SearchHubSpotModel<T>>(path, opts, Method.POST);
+            var data = _client.Execute<SearchHubSpotModel<TDeal>, SearchRequestOptions>(path, opts, Method.POST);
 
             return data;
         }
@@ -210,11 +222,11 @@
         /// <typeparam name="T">Implementation of <see cref="DealHubSpotModel"/></typeparam>
         /// <param name="entity">The deal to associate the company with</param>
         /// <param name="companyId">The Id of the company to associate the deal with</param>
-        public T AssociateToCompany<T>(T entity, long companyId) where T : DealHubSpotModel, new()
+        public TDeal AssociateToCompany(TDeal entity, long companyId)
         {
             var path = "/crm-associations/v1/associations";
 
-            _client.Execute(path, new
+            _client.Execute<TDeal, object>(path, new
             {
                 fromObjectId = entity.Id,
                 toObjectId = companyId,
@@ -231,11 +243,11 @@
         /// <typeparam name="T">Implementation of <see cref="DealHubSpotModel"/></typeparam>
         /// <param name="entity">The deal to associate the contact with</param>
         /// <param name="contactId">The Id of the contact to associate the deal with</param>
-        public T AssociateToContact<T>(T entity, long contactId) where T : DealHubSpotModel, new()
+        public TDeal AssociateToContact(TDeal entity, long contactId)
         {
             var path = "/crm-associations/v1/associations";
 
-            _client.Execute(path, new
+            _client.Execute<TDeal, object>(path, new
             {
                 fromObjectId = entity.Id,
                 toObjectId = contactId,
@@ -251,7 +263,7 @@
         /// </summary>
         /// <typeparam name="T">Implementation of <see cref="DealHubSpotModel"/></typeparam>
         /// <param name="entity">The deal to get associations for</param>
-        public T GetAssociations<T>(T entity) where T : DealHubSpotModel, new()
+        public TDeal GetAssociations(TDeal entity)
         {
             // see https://legacydocs.hubspot.com/docs/methods/crm-associations/crm-associations-overview
             var companyPath = $"/crm-associations/v1/associations/{entity.Id}/HUBSPOT_DEFINED/5";
@@ -260,7 +272,7 @@
             var companyResults = new List<long>();
             do
             {
-                var companyAssociations = _client.ExecuteList<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", companyPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
+                var companyAssociations = _client.Execute<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", companyPath, offSet == null ? null : "&offset=" + offSet));
                 if (companyAssociations.Results.Any())
                     companyResults.AddRange(companyAssociations.Results);
                 if (companyAssociations.HasMore)
@@ -279,7 +291,7 @@
             var contactResults = new List<long>();
             do
             {
-                var contactAssociations = _client.ExecuteList<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", contactPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
+                var contactAssociations = _client.Execute<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", contactPath, offSet == null ? null : "&offset=" + offSet));
                 if (contactAssociations.Results.Any())
                     contactResults.AddRange(contactAssociations.Results);
                 if (contactAssociations.HasMore)

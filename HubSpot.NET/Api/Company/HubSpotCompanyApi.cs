@@ -1,14 +1,14 @@
 namespace HubSpot.NET.Api.Company
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net;
     using HubSpot.NET.Api.Company.Dto;
     using HubSpot.NET.Core;
     using HubSpot.NET.Core.Abstracts;
     using HubSpot.NET.Core.Interfaces;
     using RestSharp;
+    using System;
+	using System.Collections.Generic;
+	using System.Linq;
+    using System.Net;
 
     public class HubSpotCompanyApi : HubSpotCompanyApi<CompanyHubSpotModel>, IHubSpotCompanyApi
     {
@@ -22,7 +22,7 @@ namespace HubSpot.NET.Api.Company
         where TCompany : CompanyHubSpotModel, new()
     {
         private readonly IHubSpotClient _client;
-        public override string MidRoute => "/companies/v2";
+        public override string MidRoute => "/companies/v2";        
 
         public HubSpotCompanyApi(IHubSpotClient client)
         {
@@ -136,7 +136,7 @@ namespace HubSpot.NET.Api.Company
 
             var path = "/crm/v3/objects/companies/search";
 
-            var data = _client.ExecuteList<CompanySearchHubSpotModel<T>>(path, opts, Method.POST);
+            var data = _client.Execute<CompanySearchHubSpotModel<TCompany>, SearchRequestOptions>(path, opts, Method.POST);
 
             return data;
         }
@@ -155,7 +155,7 @@ namespace HubSpot.NET.Api.Company
             var dealResults = new List<long>();
             do
             {
-                var dealAssociations = _client.ExecuteList<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", companyPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
+                var dealAssociations = _client.Execute<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", companyPath, offSet == null ? null : "&offset=" + offSet));
                 if (dealAssociations.Results.Any())
                     dealResults.AddRange(dealAssociations.Results);
                 if (dealAssociations.HasMore)
@@ -174,7 +174,7 @@ namespace HubSpot.NET.Api.Company
             var contactResults = new List<long>();
             do
             {
-                var contactAssociations = _client.ExecuteList<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", contactPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
+                var contactAssociations = _client.Execute<AssociationIdListHubSpotModel>(string.Format("{0}?limit=100{1}", contactPath, offSet == null ? null : "&offset=" + offSet));
                 if (contactAssociations.Results.Any())
                     contactResults.AddRange(contactAssociations.Results);
                 if (contactAssociations.HasMore)

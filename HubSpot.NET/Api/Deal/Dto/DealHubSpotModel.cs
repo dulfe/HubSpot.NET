@@ -7,6 +7,18 @@ using HubSpot.NET.Core.Interfaces;
 
 namespace HubSpot.NET.Api.Deal.Dto
 {
+    /// <summary>
+    /// Models the associations of a deal to companies & contacts
+    /// </summary>
+    [DataContract]
+    public class DealHubSpotAssociationIds
+    {
+        [DataMember(Name = "associatedCompanyIds")]
+        public long[] AssociatedCompany { get; set; }
+
+        [DataMember(Name = "associatedVids")]
+        public long[] AssociatedContacts { get; set; }
+    }
 
     /// <summary>
     /// Models a Deal entity within HubSpot. Default properties are included here
@@ -48,13 +60,15 @@ namespace HubSpot.NET.Api.Deal.Dto
         [DataMember(Name = "dealtype")]
         public string DealType { get; set; }
 
+        [IgnoreDataMember]
+        public DealHubSpotAssociationIds AssociationIds { get; set; }
+
         [DataMember(Name = "createdate")]
         [LongDate]
         [IgnoreDataMember]
         public DateTime? DateCreated { get; set; }
 
         [DataMember(Name = "isDeleted")]
-        [LongDate]
         [IgnoreDataMember]
         public bool? IsDeleted { get; set; }
 
@@ -66,6 +80,7 @@ namespace HubSpot.NET.Api.Deal.Dto
         public virtual void ToHubSpotDataEntity(ref DealHubSpotModel converted) 
         {
             converted.Associations = Associations;
+            converted.AssociationIds = AssociationIds;
         }
 
         public virtual void FromHubSpotDataEntity(DealHubSpotModel hubspotData)
@@ -74,6 +89,11 @@ namespace HubSpot.NET.Api.Deal.Dto
             {
                 Associations.AssociatedContacts = hubspotData.Associations.AssociatedContacts;
                 Associations.AssociatedCompany = hubspotData.Associations.AssociatedCompany;
+            }
+            if (hubspotData.AssociationIds != null)
+            {
+                AssociationIds.AssociatedContacts = hubspotData.AssociationIds.AssociatedContacts;
+                AssociationIds.AssociatedCompany = hubspotData.AssociationIds.AssociatedCompany;
             }
         }
     }

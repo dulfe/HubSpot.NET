@@ -65,7 +65,7 @@ using System.Runtime.Serialization;
             PropertyInfo[] properties = GetType().GetProperties();
 
             foreach (PropertyInfo prop in properties)
-        {
+            {
                 var key = prop.GetCustomAttribute(typeof(DataMemberAttribute)) as DataMemberAttribute;
                 object value = prop.GetValue(this);
             

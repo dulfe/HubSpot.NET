@@ -8,11 +8,10 @@ namespace HubSpot.NET.Api.Contact.Dto
     /// </summary>
     [DataContract]
     public class ContactSearchRequestOptions : ListRequestOptions
-    {   
+    {
         /// <summary>
         /// Gets or set the query term to use when searching
         /// </summary>
         public string Query { get; set; }
-
     }
 }

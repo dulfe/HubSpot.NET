@@ -8,7 +8,7 @@ namespace HubSpot.NET.Core.Interfaces
     { }
 
     public interface IHubSpotCompanyApi<T> : ICRUDable<T>
-        where T : IHubSpotModel
+        where T : CompanyHubSpotModel, IHubSpotModel, new()
     {
         CompanySearchResultModel<T> GetByDomain(string domain, CompanySearchByDomain options = null);
         CompanyListHubSpotModel<T> List(ListRequestOptions opts = null);

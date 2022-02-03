@@ -10,8 +10,9 @@
     using System;
     using System.Collections.Generic;
     using System.Text;
+	using HubSpotError = Core.HubSpotError;
 
-    public class HubSpotOAuthApi : ApiRoutable, IHubSpotOAuthApi
+	public class HubSpotOAuthApi : ApiRoutable, IHubSpotOAuthApi
     {
         public string ClientId { get; private set; }
         private string _clientSecret;

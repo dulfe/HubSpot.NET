@@ -3,7 +3,7 @@
     using System.Runtime.Serialization;
 
     [DataContract]
-    public class PropertyValuePair
+    public class PropertyValuePair : IKeyValuePair
     {
         public PropertyValuePair() { }
         public PropertyValuePair(string prop, string value) : this()
@@ -19,5 +19,29 @@
         public string Value { get; set; }
 
         public override string ToString() => $"{Property}: {Value}";
+
+        string IKeyValuePair.Key
+        {
+            get
+            {
+                return Property;
+            }
+            set
+            {
+                Property = value;
+            }
+        }
+
+        string IKeyValuePair.Value
+        {
+            get
+            {
+                return Value;
+            }
+            set
+            {
+                Value = value;
+            }
+        }
     }
 }

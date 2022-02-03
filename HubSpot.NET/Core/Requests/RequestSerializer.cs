@@ -30,64 +30,10 @@ namespace HubSpot.NET.Core.Requests
         /// </summary>
         /// <remarks>Use this constructor if you wish to override dependencies</remarks>
         /// <param name="requestDataConverter">The request data converter.</param>
-        public RequestSerializer(
-            RequestDataConverter requestDataConverter) : this()
+        public RequestSerializer(RequestDataConverter requestDataConverter)
+            : this()
         {
             _requestDataConverter = requestDataConverter;
-        }
-
-        /// <summary>
-        /// Serializes the entity to JSON.
-        /// </summary>
-        /// <param name="obj">The entity.</param>
-        /// <param name="convertToPropertiesSchema"></param>
-        /// <returns>The serialized entity</returns>
-        public virtual string SerializeEntity(object obj, bool convertToPropertiesSchema = true)
-        {
-            if (obj is IHubSpotModel entity && convertToPropertiesSchema)
-            {
-                var converted = _requestDataConverter.ToHubspotDataEntity(entity);
-
-                entity.ToHubSpotDataEntity(ref converted);
-
-                return JsonConvert.SerializeObject(
-                    converted,
-                    _jsonSerializerSettings);
-            }
-
-            return JsonConvert.SerializeObject(
-                obj,
-                _jsonSerializerSettings);
-        }
-
-
-        /// <summary>
-        /// Serializes the entity to JSON.
-        /// </summary>
-        /// <param name="obj">The entity.</param>
-        /// <param name="convertToPropertiesSchema"></param>
-        /// <returns>The serialized entity</returns>
-        public virtual string SerializeEntity(List<object> obj, bool convertToPropertiesSchema = true)
-        {
-            if (convertToPropertiesSchema)
-            {
-
-                var objs = obj.Select(e =>
-                {
-                    var entity = (IHubSpotModel) e;
-                    var converted = _requestDataConverter.ToHubspotDataEntity(entity, true);
-                    entity.ToHubSpotDataEntity(ref converted);
-                    return converted;
-                });
-
-                return JsonConvert.SerializeObject(
-                    objs,
-                    _jsonSerializerSettings);
-            }
-
-            return JsonConvert.SerializeObject(
-                obj,
-                _jsonSerializerSettings);
         }
 
         /// <summary>
@@ -103,7 +49,7 @@ namespace HubSpot.NET.Core.Requests
                 var jobj = JsonConvert.DeserializeObject<ExpandoObject>(json);
                 var converted = _requestDataConverter.FromHubSpotResponse<T>(jobj);
 
-                converted.FromHubSpotDataEntity(jobj);
+//                converted.FromHubSpotDataEntity(jobj);
 
                 return converted;
             }

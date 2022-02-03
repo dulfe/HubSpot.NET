@@ -54,7 +54,7 @@ namespace HubSpot.NET.Examples
             /**
              * Search for a company
              */
-            var searchedCompany = api.Company.Search<CompanyHubSpotModel>(new SearchRequestOptions()
+            var searchedCompany = api.Company.Search(new SearchRequestOptions()
             {
                 FilterGroups = new List<SearchRequestFilterGroup>
                 {

@@ -90,7 +90,7 @@ using RestSharp;
         private T SendReceiveRequest<T>(string path, Method method) where T : new()
         {
             RestRequest request = ConfigureRequestAuthentication(path, method);
-            IRestResponse<T> response = _client.Execute<T>(request);
+            IRestResponse response = _client.Execute(request);
 
             if (response.IsSuccessful == false)
                 throw new HubSpotException("Error from HubSpot", new HubSpotError(response.StatusCode, response.StatusDescription), response.Content);
@@ -108,14 +108,13 @@ using RestSharp;
         /// <param name="entity">The entity being sent in the request.</param>
         /// <returns>An entity of type T returned from the request.</returns>
         private T SendReceiveRequest<T,K>(string path, Method method, K entity) where T: new()
-            {
+        {
             RestRequest request = ConfigureRequestAuthentication(path, method);
 
-            if(entity != default)
+            if(method != Method.GET && !entity.Equals(default(K)))
                 request.AddJsonBody(entity);
 
-
-            IRestResponse<T> response = _client.Execute<T>(request);
+            IRestResponse response = _client.Execute(request);
 
             if (response.IsSuccessful == false)
                 throw new HubSpotException("Error from HubSpot", new HubSpotError(response.StatusCode, response.StatusDescription), response.Content);
@@ -136,7 +135,7 @@ using RestSharp;
 
             RestRequest request = ConfigureRequestAuthentication(path, method);
 
-            if (entity != default)
+            if (!entity.Equals(default(T)))
                 request.AddJsonBody(entity);
 
             IRestResponse response = _client.Execute(request);
@@ -151,7 +150,7 @@ using RestSharp;
         /// <param name="path">The endpoint target.</param>
         /// <param name="method">The REST method to use.</param>
         private void SendOnlyRequest(string path, Method method)
-            {
+        {
 
             RestRequest request = ConfigureRequestAuthentication(path, method);
 
@@ -182,13 +181,13 @@ using RestSharp;
 
             request.JsonSerializer = new NewtonsoftRestSharpSerializer();            
             return request;
-        }
-        
+            }
+
         private string GetAuthHeader(HubSpotToken token) 
             => $"Bearer {token.AccessToken}";
         #endregion
-    }
-     
+        }
+        
     public enum HubSpotAuthenticationMode
     {
         HAPIKEY, OAUTH

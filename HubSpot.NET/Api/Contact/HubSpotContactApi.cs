@@ -3,15 +3,25 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
-    using Flurl;
+    using System.Net;    
     using HubSpot.NET.Api.Contact.Dto;
-    using HubSpot.NET.Core;
+	using HubSpot.NET.Api.Shared;
+	using HubSpot.NET.Core;
     using HubSpot.NET.Core.Abstracts;
     using HubSpot.NET.Core.Interfaces;
     using RestSharp;
 
-    public class HubSpotContactApi : ApiRoutable, IHubSpotContactApi
+    public class HubSpotContactApi : HubSpotContactApi<ContactHubSpotModel>, IHubSpotContactApi
+    {
+        public HubSpotContactApi(IHubSpotClient client)
+            : base(client)
+        {
+        }
+    }
+
+    public class HubSpotContactApi<TContact>
+        : ApiRoutable, IHubSpotContactApi<TContact>
+        where TContact : ContactHubSpotModel, new()
     {
         private readonly IHubSpotClient _client;
         public override string MidRoute => "/contacts/v1";
@@ -28,12 +38,12 @@
         /// <param name="entity">The entity</param>
         /// <returns>The created entity (with ID set)</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public ContactHubSpotModel Create(ContactHubSpotModel entity)
+        public TContact Create(TContact entity)
         {
             CreateOrUpdateContactTransportModel transport = new CreateOrUpdateContactTransportModel(entity);
-            string path = GetRoute<ContactHubSpotModel>("contact");
+            string path = GetRoute<TContact>("contact");
 
-            return _client.Execute<ContactHubSpotModel, CreateOrUpdateContactTransportModel>(path, transport, Method.POST);
+            return _client.Execute<TContact, CreateOrUpdateContactTransportModel>(path, transport, Method.POST);
         }
 
         /// <summary>
@@ -42,13 +52,7 @@
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <param name="entity">The entity</param>
         /// <returns>The created entity (with ID set)</returns>
-        public ContactHubSpotModel CreateOrUpdate(ContactHubSpotModel entity)
-        {
-            CreateOrUpdateContactTransportModel transport = new CreateOrUpdateContactTransportModel(entity);
-            string path = GetRoute<ContactHubSpotModel>("contact", "createOrUpdate", "email", entity.Email);
-
-            return _client.Execute<ContactHubSpotModel, CreateOrUpdateContactTransportModel>(path, transport, Method.POST);
-        }
+        public TContact CreateOrUpdate(TContact entity) => CreateOrUpdate(entity.Email, entity);
 
         /// <summary>
         /// Creates or updates a contact entity based on the entity's current email.
@@ -56,12 +60,12 @@
         /// <param name="originalEmail">The email the server knows, assuming the entity email may be different.</param>
         /// <param name="entity">The contact entity to update on the server.</param>
         /// <returns>The updated entity (with ID set)</returns>
-        public ContactHubSpotModel CreateOrUpdate(string originalEmail, ContactHubSpotModel entity)
+        public TContact CreateOrUpdate(string originalEmail, TContact entity)
         {
             CreateOrUpdateContactTransportModel transport = new CreateOrUpdateContactTransportModel(entity);
-            string path = GetRoute<ContactHubSpotModel>("contact", "createOrUpdate", "email", originalEmail);
+            string path = GetRoute<TContact>("contact", "createOrUpdate", "email", originalEmail);
 
-            return _client.Execute<ContactHubSpotModel, CreateOrUpdateContactTransportModel>(path, transport, Method.POST);
+            return _client.Execute<TContact, CreateOrUpdateContactTransportModel>(path, transport, Method.POST);
         }
 
         /// <summary>
@@ -70,18 +74,18 @@
         /// <param name="contactId">ID of the contact</param>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <returns>The contact entity or null if the contact does not exist.</returns>
-        public ContactHubSpotModel GetById(long contactId, bool IncludeHistory = true)
+        public TContact GetById(long contactId, bool IncludeHistory = true)
         {
             try
             {
                 if (IncludeHistory)
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact","vid", contactId.ToString(),"profile"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact","vid", contactId.ToString(),"profile"));
                     return data;
                 }
                 else
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact", "vid", contactId.ToString(), "profile?propertyMode=value_only"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact", "vid", contactId.ToString(), "profile?propertyMode=value_only"));
                     return data;
                 }
             }
@@ -93,7 +97,7 @@
             }
         }
 
-        public ContactHubSpotModel GetById(long Id) => GetById(Id, true);
+        public TContact GetById(long Id) => GetById(Id, true);
 
         /// <summary>
         /// Gets a contact by their email address
@@ -101,18 +105,18 @@
         /// <param name="email">Email address to search for</param>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <returns>The contact entity or null if the contact does not exist.</returns>
-        public ContactHubSpotModel GetByEmail(string email, bool IncludeHistory = true)
+        public TContact GetByEmail(string email, bool IncludeHistory = true)
         {
             try
             {
                 if (IncludeHistory)
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact", "email", email, "profile"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact", "email", email, "profile"));
                     return data;
                 }
                 else
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact", "email", email, "profile?propertyMode=value_only"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact", "email", email, "profile?propertyMode=value_only"));
                     return data;
                 }
             }
@@ -130,18 +134,18 @@
         /// <param name="userToken">User token to search for from hubspotutk cookie</param>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <returns>The contact entity or null if the contact does not exist.</returns>
-        public ContactHubSpotModel GetByUserToken(string userToken, bool IncludeHistory = true)
+        public TContact GetByUserToken(string userToken, bool IncludeHistory = true)
         {
             try
             {
                 if (IncludeHistory)
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact", "utk", userToken, "profile"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact", "utk", userToken, "profile"));
                     return data;
                 }
                 else
                 {
-                    var data = _client.Execute<ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact", "utk", userToken, "profile?propertyMode=value_only"));
+                    var data = _client.Execute<TContact>(GetRoute<TContact>("contact", "utk", userToken, "profile?propertyMode=value_only"));
                     return data;
                 }
             }
@@ -160,20 +164,21 @@
         /// <param name="opts">Request options - used for pagination etc.</param>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <returns>A list of contacts</returns>
-        public ContactListHubSpotModel<ContactHubSpotModel> List(ListRequestOptions opts = null)
+        public ContactListHubSpotModel<TContact> List(ListRequestOptions opts = null)
         {
-            opts = opts ?? new ListRequestOptions();            
+            opts = opts ?? new ListRequestOptions();
 
-            var path = GetRoute<ContactHubSpotModel>("lists", "all", "contacts","all")
-                .SetQueryParam("count", opts.Limit);
+            string path = GetRoute<TContact>("lists", "all", "contacts", "all");
+
+            path += $"{QueryParams.COUNT}={opts.Limit}";
 
             if (opts.PropertiesToInclude.Any())
-                path.SetQueryParam("property", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTY}={opts.PropertiesToInclude}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("vidOffset", opts.Offset);
+                path = path += $"{QueryParams.VID_OFFSET}={opts.Offset}";
 
-            var data = _client.Execute<ContactListHubSpotModel<ContactHubSpotModel>, ListRequestOptions>(path, opts);           
+            var data = _client.Execute<ContactListHubSpotModel<TContact>, ListRequestOptions>(path, opts);
 
             return data;        }
 
@@ -182,12 +187,12 @@
         /// </summary>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <param name="contact">The contact entity</param>
-        public ContactHubSpotModel Update(ContactHubSpotModel contact)
+        public TContact Update(TContact contact)
         {
             if (contact.Id < 1)
                 throw new ArgumentException("Contact entity must have an id set!");
 
-            return _client.Execute<ContactHubSpotModel, ContactHubSpotModel>(GetRoute<ContactHubSpotModel>("contact","vid", contact.Id.ToString(), "profile"), contact, Method.POST);
+            return _client.Execute<TContact, TContact>(GetRoute<TContact>("contact","vid", contact.Id.ToString(), "profile"), contact, Method.POST);
         }
         
         /// <summary>
@@ -195,7 +200,7 @@
         /// </summary>
         /// <param name="contactId">The ID of the contact</param>
         public void Delete(long contactId)
-            => _client.ExecuteOnly(GetRoute<ContactHubSpotModel>("contact", "vid", contactId.ToString()), method: Method.DELETE);
+            => _client.ExecuteOnly(GetRoute<TContact>("contact", "vid", contactId.ToString()), method: Method.DELETE);
 
         /// <summary>
         /// Update or create a set of contacts, this is the preferred method when creating/updating in bulk.
@@ -203,8 +208,8 @@
         /// </summary>
         /// <typeparam name="T">Implementation of ContactHubSpotModel</typeparam>
         /// <param name="contacts">The set of contacts to update/create</param>
-        public void Batch(List<ContactHubSpotModel> contacts)
-            => _client.ExecuteBatch(GetRoute<ContactHubSpotModel>("contact", "batch"), contacts.Select(c => (object) c).ToList(), Method.POST);        
+        public void Batch(List<TContact> contacts)
+            => _client.ExecuteBatch(GetRoute<TContact>("contact", "batch"), contacts.Select(c => (object) c).ToList(), Method.POST);
 
         /// <summary>
         /// Get recently updated (or created) contacts
@@ -212,46 +217,54 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="opts">Request options</param>
         /// <returns></returns>
-        public ContactListHubSpotModel<ContactHubSpotModel> RecentlyUpdated(ListRecentRequestOptions opts = null)
+        public ContactListHubSpotModel<TContact> RecentlyUpdated(ListRecentRequestOptions opts = null)
         {
-            opts = opts ?? new ListRecentRequestOptions();            
+            opts = opts ?? new ListRecentRequestOptions();
 
-            Url path = GetRoute<ContactHubSpotModel>("lists", "recently_updated","contacts","recent")
-                .SetQueryParam("count", opts.Limit);
+            string path = GetRoute<TContact>("lists", "recently_updated", "contacts", "recent");
+
+            path += $"?{QueryParams.COUNT}={opts.Limit}";
 
             if (opts.PropertiesToInclude.Any())
-                path.SetQueryParam("property", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTY}={opts.PropertiesToInclude}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("vidOffset", opts.Offset);
+                path += $"{QueryParams.VID_OFFSET}={opts.Offset}";
 
             if (!string.IsNullOrEmpty(opts.TimeOffset))
-                path = path.SetQueryParam("timeOffset", opts.TimeOffset);
-            
-            path = path.SetQueryParam("propertyMode", opts.PropertyMode)
-                        .SetQueryParam("formSubmissionMode", opts.FormSubmissionMode)
-                        .SetQueryParam("showListMemberships", opts.ShowListMemberships);
-            
-            return _client.Execute<ContactListHubSpotModel<ContactHubSpotModel>, ListRecentRequestOptions>(path, opts);            
-        }
+                path += $"{QueryParams.TIME_OFFSET}={opts.TimeOffset}";
 
-        public ContactSearchHubSpotModel<ContactHubSpotModel> Search(ContactSearchRequestOptions opts = null)
+            path += $"{QueryParams.PROPERTY_MODE}={opts.PropertyMode}" +
+                $"&{QueryParams.FORM_SUBMISSION_MODE}={opts.FormSubmissionMode}" +
+                $"&{QueryParams.SHOW_LIST_MEMBERSHIPS}={opts.ShowListMemberships}";
+
+            return _client.Execute<ContactListHubSpotModel<TContact>, ListRecentRequestOptions>(path, opts);
+        }
+        public ContactSearchHubSpotModel<TContact> Search(ContactSearchRequestOptions opts = null)
         {
             opts = opts ?? new ContactSearchRequestOptions();
-
-            Url path = GetRoute<ContactHubSpotModel>("search","query")
-                .SetQueryParam("q", opts.Query)
-                .SetQueryParam("count", opts.Limit);
+            
+            string path = GetRoute<TContact>("search", "query");
+                
+            path += $"?q={WebUtility.UrlEncode(opts.Query)}&{QueryParams.COUNT}={opts.Limit}";
 
             if (opts.PropertiesToInclude.Any())
-                path.SetQueryParam("property", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTY}={opts.PropertiesToInclude}";
+
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("offset", opts.Offset);
+                path = path += $"{QueryParams.OFFSET}={opts.Offset}";
 
-            var data = _client.Execute<ContactSearchHubSpotModel<ContactHubSpotModel>, ContactSearchRequestOptions>(path, opts);            
+            var results = _client.Execute<ContactSearchHubSpotModel<TContact>, ContactSearchRequestOptions>(path, opts);
 
-            return data;        }
+            var helper = new KeyValuePairHelper();
+            foreach (var result in results.Contacts)
+			{
+                helper.FromPropertyTransportModel(result, result.Properties.Select(x => new PropertyValuePair { Property = x.Key, Value = x.Value.Value.ToString() }));
+            }
+
+            return results;
+        }
 
         /// <summary>
         /// Get a list of recently created contacts
@@ -259,27 +272,57 @@
         /// <typeparam name="T"></typeparam>
         /// <param name="opts">Request options</param>
         /// <returns></returns>
-        public ContactListHubSpotModel<ContactHubSpotModel> RecentlyCreated(ListRecentRequestOptions opts = null)
+        public ContactListHubSpotModel<TContact> RecentlyCreated(ListRecentRequestOptions opts = null)
         {
             opts = opts ?? new ListRecentRequestOptions();
 
-            Url path = GetRoute<ContactHubSpotModel>("lists","all","contacts","recent")
-                .SetQueryParam("count", opts.Limit);
+            string path = GetRoute<TContact>("lists", "all", "contacts", "recent");
+
+            path += $"{QueryParams.COUNT}={opts.Limit}";
 
             if (opts.PropertiesToInclude.Any())
-                path.SetQueryParam("property", opts.PropertiesToInclude);
+                path += $"{QueryParams.PROPERTY}={opts.PropertiesToInclude}";
 
             if (opts.Offset.HasValue)
-                path = path.SetQueryParam("vidOffset", opts.Offset);
+                path = path += $"{QueryParams.VID_OFFSET}={opts.Offset}";
 
-            if (!string.IsNullOrEmpty(opts.TimeOffset))
-                path = path.SetQueryParam("timeOffset", opts.TimeOffset);
+            if (!string.IsNullOrEmpty(opts.TimeOffset))            
+                path = path += $"{QueryParams.TIME_OFFSET}={opts.TimeOffset}";
+
+            path += $"{QueryParams.PROPERTY_MODE}={opts.PropertyMode}"
+                    + $"{QueryParams.FORM_SUBMISSION_MODE}={opts.FormSubmissionMode}"
+                    + $"{QueryParams.SHOW_LIST_MEMBERSHIPS}={opts.ShowListMemberships}";   
             
-            path = path.SetQueryParam("propertyMode", opts.PropertyMode)
-                        .SetQueryParam("formSubmissionMode", opts.FormSubmissionMode)
-                        .SetQueryParam("showListMemberships", opts.ShowListMemberships);   
+            return _client.Execute<ContactListHubSpotModel<TContact>, ListRecentRequestOptions>(path, opts);
+        }
+
+        /// <summary>
+        /// Get all contacts in a list
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="listId"></param>
+        /// <param name="opts"></param>
+        /// <returns></returns>
+        public ContactListHubSpotModel<TContact> GetList(long listId, ListRequestOptions opts = null)
+        {
+            if (opts == null)
+            {
+                opts = new ListRequestOptions();
+            }
+
+            string path = GetRoute<TContact>("lists", $"{listId}", "contacts", "all");
+            path += $"{QueryParams.COUNT}={opts.Limit}";
+
+
+            if (opts.PropertiesToInclude.Any())
+                path += $"{QueryParams.PROPERTY}={opts.PropertiesToInclude}";
+
+            if (opts.Offset.HasValue)
+                path = path += $"{QueryParams.VID_OFFSET}={opts.Offset}";
+
+            var data = _client.Execute<ContactListHubSpotModel<TContact>>(path);
             
-            return _client.Execute<ContactListHubSpotModel<ContactHubSpotModel>, ListRecentRequestOptions>(path, opts);
+            return data;
         }
     }
 }
