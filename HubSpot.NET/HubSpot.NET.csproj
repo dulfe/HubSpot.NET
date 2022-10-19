@@ -15,6 +15,10 @@
 		<RepositoryUrl>https://github.com/Chinchilla-Software-Com/HubSpot.NET</RepositoryUrl>
 		<PackageTags>hubspot api wrapper c# contact company deal engagement properties crm</PackageTags>
 		<PackageReleaseNotes>
+			Version 1.3.0
+
+			* Bugfix for OAuth token renewals - as per requested by https://github.com/Chinchilla-Software-Com/HubSpot.NET/issues/16
+
 			Version 1.2.0
 
 			* Implement basic task list API operations - as per requested by https://github.com/Chinchilla-Software-Com/HubSpot.NET/issues/13
