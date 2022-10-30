@@ -18,7 +18,7 @@ namespace HubSpot.NET.Examples
                 Amount = 10000,
                 Name = "New Deal #1",
                 DealType = "newbusiness",
-                Stage = System.Configuration.ConfigurationManager.AppSettings["ClosedStageId"] ?? "closedlost",
+                Stage = Examples.GetAppSetting("ClosedStageId") ?? "closedlost",
                 DateCreated = DateTime.UtcNow
             });
 
