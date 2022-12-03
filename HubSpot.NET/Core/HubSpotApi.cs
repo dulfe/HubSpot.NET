@@ -7,6 +7,7 @@ using HubSpot.NET.Api.Engagement;
 using HubSpot.NET.Api.Files;
 using HubSpot.NET.Api.Owner;
 using HubSpot.NET.Api.Properties;
+using HubSpot.NET.Api.Task;
 using HubSpot.NET.Core.Interfaces;
 using HubSpot.NET.Core.OAuth.Dto;
 
@@ -37,6 +38,7 @@ namespace HubSpot.NET.Core
             Engagement = new HubSpotEngagementApi(client);
             File = new HubSpotCosFileApi(client);
             Owner = new HubSpotOwnerApi(client);
+            Task = new HubSpotTaskApi(client);
             CompanyProperties = new HubSpotCompaniesPropertiesApi(client);
             EmailSubscriptions = new HubSpotEmailSubscriptionsApi(client);
             ContactLists = new HubSpotContactListApi(client);
