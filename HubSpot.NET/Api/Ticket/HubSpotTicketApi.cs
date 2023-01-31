@@ -159,7 +159,7 @@
         }
 
         /// <summary>
-        /// Associate a Company to a ticket
+        /// Associate a company to a ticket
         /// </summary>
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
         /// <param name="entity">The ticket to associate the company with</param>
