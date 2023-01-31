@@ -202,7 +202,7 @@
         }
 
         /// <summary>
-        /// Associate a Cntact to a ticket
+        /// Associate a contact to a ticket
         /// </summary>
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
         /// <param name="entity">The ticket to associate the contact with</param>
