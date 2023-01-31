@@ -8,6 +8,7 @@ using HubSpot.NET.Api.Files;
 using HubSpot.NET.Api.Owner;
 using HubSpot.NET.Api.Properties;
 using HubSpot.NET.Api.Task;
+using HubSpot.NET.Api.Ticket;
 using HubSpot.NET.Core.Interfaces;
 using HubSpot.NET.Core.OAuth.Dto;
 
@@ -27,8 +28,8 @@ namespace HubSpot.NET.Core
 		public IHubSpotTaskApi Task { get; protected set; }
 		public IHubSpotCompanyPropertiesApi CompanyProperties { get; protected set; }
         public IHubSpotContactListApi ContactLists { get; protected set; }
-
         public IHubSpotEmailSubscriptionsApi EmailSubscriptions { get; protected set; }
+        public IHubSpotTicketApi Ticket { get; protected set; }
 
         protected virtual void Initialise(IHubSpotClient client)
 		{
@@ -42,6 +43,7 @@ namespace HubSpot.NET.Core
             CompanyProperties = new HubSpotCompaniesPropertiesApi(client);
             EmailSubscriptions = new HubSpotEmailSubscriptionsApi(client);
             ContactLists = new HubSpotContactListApi(client);
+            Ticket = new HubSpotTicketApi(client);
         }
 
         public HubSpotApi(string apiKey)
