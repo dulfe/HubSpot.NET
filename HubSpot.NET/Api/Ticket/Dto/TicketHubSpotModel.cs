@@ -14,7 +14,7 @@ namespace HubSpot.NET.Api.Ticket.Dto
         }
 
         /// <summary>
-        /// Contacts unique Id in HubSpot
+        /// Tickets unique Id in HubSpot
         /// </summary>
         [DataMember(Name = "hs_ticket_id")]
         public long? Id { get; set; }

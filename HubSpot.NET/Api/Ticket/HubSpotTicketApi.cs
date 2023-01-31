@@ -99,7 +99,7 @@
         }
 
         /// <summary>
-        /// Gets a list of tickets associated to a hubSpot Object
+        /// Gets a list of tickets associated to a HubSpot Object
         /// </summary>
         /// <typeparam name="T">Implementation of TicketListHubSpotModel</typeparam>
         /// <param name="includeAssociations">Bool include associated Ids</param>
