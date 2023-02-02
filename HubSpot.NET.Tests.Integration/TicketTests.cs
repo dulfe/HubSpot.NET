@@ -71,11 +71,11 @@ namespace HubSpot.NET.Tests.Integration
                 Category = "PRODUCT_ISSUE"
             };
 
-            // Act
             TicketHubSpotModel ticket = ticketApi.Create(sampleTicket);
 
             try
             {
+                // Act
                 var retrievedTicket = ticketApi.GetById<TicketHubSpotModel>(ticket.Id.Value);
 
                 // Assert
