@@ -3,11 +3,11 @@
 	<PropertyGroup>
 		<TargetFrameworks>net452;net451;netstandard2.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.4</Version>
+		<Version>1.5</Version>
 		<Authors>Chinchilla Software Limited</Authors>
 		<Company>Chinchilla Software Limited</Company>
 		<Description>C# .NET Wrapper around the common HubSpot APIs.</Description>
-		<Copyright>2021 Chinchilla Software Limited.</Copyright>
+		<Copyright>2023 Chinchilla Software Limited.</Copyright>
 		<!--
 		<PackageLicenseUrl>https://github.com/Chinchilla-Software-Com/HubSpot.NET/blob/master/LICENSE</PackageLicenseUrl>
 		-->
@@ -15,6 +15,10 @@
 		<RepositoryUrl>https://github.com/Chinchilla-Software-Com/HubSpot.NET</RepositoryUrl>
 		<PackageTags>hubspot api wrapper c# contact company deal engagement properties crm</PackageTags>
 		<PackageReleaseNotes>
+			Version 1.5.0
+
+			* Implement basic ticket API operations - community contribution thanks to https://github.com/avalanchis
+
 			Version 1.4.0
 
 			* Bugfix for Task property initialisation on HubspotApi - as per requested by https://github.com/Chinchilla-Software-Com/HubSpot.NET/issues/19
