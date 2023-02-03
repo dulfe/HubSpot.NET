@@ -69,7 +69,8 @@
 
             var path = $"{entity.RouteBasePath}/{entity.Id}";
 
-            var data = _client.Execute<T>(path, entity, method: Method.PATCH, convertToPropertiesSchema: true);
+            var data = _client.Execute<T>(path, entity, Method.PATCH, SerialisationType.PropertyBag);
+
             return data;
         }
 
