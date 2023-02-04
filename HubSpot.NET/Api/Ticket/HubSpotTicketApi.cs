@@ -191,18 +191,6 @@
         }
 
         /// <summary>
-        /// Delete a contact association for a ticket
-        /// </summary>
-        /// <param name="ticketId">The ticket for which to delete the contact assocation</param>
-        /// <param name="contactId">The Id of the contact to delete the association for </param>
-        public void DeleteContactAssociation(long ticketId, long contactId)
-        {
-            var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{ticketId}/associations/contact/{contactId}";
-
-            _client.Execute(path, method: Method.DELETE, convertToPropertiesSchema: true);
-        }
-
-        /// <summary>
         /// Associate a contact to a ticket
         /// </summary>
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
@@ -219,6 +207,49 @@
             }}, method: Method.PUT, convertToPropertiesSchema: true);
             entity.Associations.AssociatedContacts = new[] { contactId };
             return entity;
+        }
+
+        /// <summary>
+        /// Delete a contact association for a ticket
+        /// </summary>
+        /// <param name="ticketId">The ticket for which to delete the contact assocation</param>
+        /// <param name="contactId">The Id of the contact to delete the association for </param>
+        public void DeleteContactAssociation(long ticketId, long contactId)
+        {
+            var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{ticketId}/associations/contact/{contactId}";
+
+            _client.Execute(path, method: Method.DELETE, convertToPropertiesSchema: true);
+        }
+
+        /// <summary>
+        /// Associate a deal to a ticket
+        /// </summary>
+        /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
+        /// <param name="entity">The ticket to associate the deal with</param>
+        /// <param name="companyId">The Id of the deal to associate the ticket with</param>
+        public T AssociateToDeal<T>(T entity, long dealId) where T : TicketHubSpotModel, new()
+        {
+            var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/deals/{dealId}";
+
+            _client.Execute(path, new List<object> { new
+            {
+                associationCategory = "HUBSPOT_DEFINED",
+                associationTypeId = 28
+            }}, method: Method.PUT, convertToPropertiesSchema: true);
+            entity.Associations.AssociatedCompany = new[] { dealId };
+            return entity;
+        }
+
+        /// <summary>
+        /// Delete a deal association for a ticket
+        /// </summary>
+        /// <param name="ticketId">The ticket for which to delete the deal assocation</param>
+        /// <param name="contactId">The Id of the deal to delete the association for </param>
+        public void DeleteDealAssociation(long ticketId, long dealId)
+        {
+            var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{ticketId}/associations/deal/{dealId}";
+
+            _client.Execute(path, method: Method.DELETE, convertToPropertiesSchema: true);
         }
 
         /// <summary>
@@ -265,6 +296,25 @@
                 entity.Associations.AssociatedContacts = contactResults.Select(r => r.ToObjectId.Value).ToArray();
             else
                 entity.Associations.AssociatedContacts = null;
+
+            // see https://legacydocs.hubspot.com/docs/methods/crm-associations/crm-associations-overview
+            var dealPath = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/deal";
+
+            var dealResults = new List<AssociationResult>();
+            do
+            {
+                var dealAssociations = _client.ExecuteList<AssociationListHubSpotModel>(string.Format("{0}?limit=100{1}", dealPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
+                if (dealAssociations.Results.Any())
+                    dealResults.AddRange(dealAssociations.Results);
+                if (dealAssociations.HasMore)
+                    offSet = dealAssociations.Offset;
+                else
+                    offSet = null;
+            } while (offSet != null);
+            if (dealResults.Any())
+                entity.Associations.AssociatedDeals = dealResults.Select(r => r.ToObjectId.Value).ToArray();
+            else
+                entity.Associations.AssociatedDeals = null;
 
             return entity;
         }

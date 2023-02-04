@@ -15,5 +15,8 @@ namespace HubSpot.NET.Api.Ticket.Dto
 
         [DataMember(Name = "associatedVids")]
         public long[] AssociatedContacts { get; set; }
+
+        [DataMember(Name = "associatedDeals")]
+        public long[] AssociatedDeals { get; set; }
     }
 }

@@ -2,6 +2,8 @@
 using HubSpot.NET.Api.Company.Dto;
 using HubSpot.NET.Api.Contact;
 using HubSpot.NET.Api.Contact.Dto;
+using HubSpot.NET.Api.Deal;
+using HubSpot.NET.Api.Deal.Dto;
 using HubSpot.NET.Api.Ticket;
 using HubSpot.NET.Api.Ticket.Dto;
 using HubSpot.NET.Core;
@@ -343,6 +345,58 @@ namespace HubSpot.NET.Tests.Integration
                 companyApi.Delete(company.Id.Value);                               
             }
         }
+
+        [TestMethod]
+        public void AssociateToDeal_TicketIsAssociatedToDeal()
+        {
+            // Arrange
+            var now = DateTime.Now.ToString("yyMMddHHmmss");
+            var ticketApi = new HubSpotTicketApi(TestSetUp.Client);
+
+            var sampleTicket = new TicketHubSpotModel
+            {
+                Pipeline = "0",
+                Stage = "1",
+                Priority = "HIGH",
+                OwnerId = Convert.ToInt64(TestSetUp.GetAppSetting("HubspotOwner")),
+                Subject = $"Subject {now}",
+                Description = "Description",
+                Category = "PRODUCT_ISSUE"
+            };
+
+            var ticket = ticketApi.Create(sampleTicket);
+
+            var dealApi = new HubSpotDealApi(TestSetUp.Client);
+
+            var sampleDeal = new DealHubSpotModel
+            {
+                Amount = 10000,
+                Name = $"New Created Deal {now}",
+                DateCreated = DateTime.UtcNow
+            };
+
+            var deal = dealApi.Create(sampleDeal);
+
+            // Act
+            ticketApi.AssociateToDeal(ticket, deal.Id.Value);
+
+            var ticketAssociations = ticketApi.GetAssociations(ticket);
+
+            try
+            {
+                // Assert
+                Assert.IsTrue(ticketAssociations.Associations.AssociatedDeals.Any());
+                Assert.IsNull(ticketAssociations.Associations.AssociatedContacts);
+                Assert.IsNull(ticketAssociations.Associations.AssociatedCompany);
+            }
+            finally
+            {
+                // Clean-up
+                ticketApi.Delete(ticket.Id.Value);
+                dealApi.Delete(deal.Id.Value);
+            }
+        }
+
 
         [TestMethod]
         public void DeleteCompanyAssociation_CompanyAssociationIsDeleted()
