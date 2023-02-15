@@ -235,7 +235,7 @@
                 associationCategory = associationCategory,
                 associationTypeId = associationTypeId
             }}, method: Method.PUT, convertToPropertiesSchema: true);
-            entity.Associations.AssociatedCompany = new[] { dealId };
+            entity.Associations.AssociatedDeals = new[] { dealId };
             return entity;
         }
 
