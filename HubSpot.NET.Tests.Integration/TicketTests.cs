@@ -54,7 +54,54 @@ namespace HubSpot.NET.Tests.Integration
             }
         }
 
-        [TestMethod]
+		[TestMethod]
+		public void Update_SampleTicket_PropertiesAreSet()
+		{
+			// Arrange
+			var now = DateTime.Now.ToString("yyMMddHHmmss");
+			var ticketApi = new HubSpotTicketApi(TestSetUp.Client);
+			var sampleTicket = new TicketHubSpotModel
+			{
+				Pipeline = "0",
+				Stage = "1",
+				Priority = "HIGH",
+				OwnerId = Convert.ToInt64(TestSetUp.GetAppSetting("HubspotOwner")),
+				Subject = $"Subject {now}",
+				Description = "Description",
+				Category = "PRODUCT_ISSUE"
+			};
+
+			TicketHubSpotModel ticket = ticketApi.Create(sampleTicket);
+
+			// Act
+			const string updatedDescription = "Description Updated";
+			ticket.Description = updatedDescription;
+
+			const string updatedSubject = "Subject Updated";
+			ticket.Subject = updatedSubject;
+
+			var updatedTicket = ticketApi.Update(ticket);
+
+			try
+			{
+				// Assert
+				Assert.IsNotNull(updatedTicket.Id, "The Id was not set and returned.");
+				Assert.AreEqual(updatedTicket.Pipeline, ticket.Pipeline);
+				Assert.AreEqual(updatedTicket.Stage, ticket.Stage);
+				Assert.AreEqual(updatedTicket.Priority, ticket.Priority);
+				Assert.AreEqual(updatedTicket.OwnerId, ticket.OwnerId);
+				Assert.AreEqual(updatedTicket.Subject, updatedSubject);
+				Assert.AreEqual(updatedTicket.Description, updatedDescription);
+				Assert.AreEqual(updatedTicket.Category, ticket.Category);
+			}
+			finally
+			{
+				// Clean-up
+				ticketApi.Delete(ticket.Id.Value);
+			}
+		}
+
+		[TestMethod]
         public void Get_SampleTicket_TicketIsRetrieved()
         {
             // Arrange

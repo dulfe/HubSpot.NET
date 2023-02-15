@@ -64,6 +64,8 @@ namespace HubSpot.NET.Api.Ticket.Dto
 
         public virtual void ToHubSpotDataEntity(ref dynamic dataEntity)
         {
+            dataEntity.hs_ticket_id = null;
+            dataEntity.hs_object_id = null;
         }
     }
 }
