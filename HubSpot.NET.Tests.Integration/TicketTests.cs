@@ -97,7 +97,7 @@ namespace HubSpot.NET.Tests.Integration
 			finally
 			{
 				// Clean-up
-				ticketApi.Delete(ticket.Id.Value);
+				ticketApi.Delete(updatedTicket.Id.Value);
 			}
 		}
 
