@@ -165,14 +165,14 @@
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
         /// <param name="entity">The ticket to associate the company with</param>
         /// <param name="companyId">The Id of the company to associate the ticket with</param>
-        public T AssociateToCompany<T>(T entity, long companyId) where T : TicketHubSpotModel, new()
+        public T AssociateToCompany<T>(T entity, long companyId, string associationCategory = "HUBSPOT_DEFINED", int associationTypeId = 26) where T : TicketHubSpotModel, new()
         {
             var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/company/{companyId}";
 
             _client.Execute(path, new List<object> { new
             {
-                associationCategory = "HUBSPOT_DEFINED",
-                associationTypeId = 26
+                associationCategory = associationCategory,
+                associationTypeId = associationTypeId
             }}, method: Method.PUT, convertToPropertiesSchema: true);
             entity.Associations.AssociatedCompany = new[] { companyId };
             return entity;
@@ -196,14 +196,14 @@
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
         /// <param name="entity">The ticket to associate the contact with</param>
         /// <param name="contactId">The Id of the contact to associate the ticket with</param>
-        public T AssociateToContact<T>(T entity, long contactId) where T : TicketHubSpotModel, new()
+        public T AssociateToContact<T>(T entity, long contactId, string associationCategory = "HUBSPOT_DEFINED", int associationTypeId = 16) where T : TicketHubSpotModel, new()
         {
             var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/contact/{contactId}";
 
             _client.Execute(path, new List<object> { new
             {
-                associationCategory = "HUBSPOT_DEFINED",
-                associationTypeId = 16
+                associationCategory = associationCategory,
+                associationTypeId = associationTypeId
             }}, method: Method.PUT, convertToPropertiesSchema: true);
             entity.Associations.AssociatedContacts = new[] { contactId };
             return entity;
