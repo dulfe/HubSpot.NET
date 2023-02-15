@@ -70,7 +70,6 @@
             var path = $"{entity.RouteBasePath}/{entity.Id}";
 
             var data = _client.Execute<T>(path, entity, Method.PATCH, SerialisationType.PropertyBag);
-
             return data;
         }
 
@@ -296,25 +295,6 @@
                 entity.Associations.AssociatedContacts = contactResults.Select(r => r.ToObjectId.Value).ToArray();
             else
                 entity.Associations.AssociatedContacts = null;
-
-            // see https://legacydocs.hubspot.com/docs/methods/crm-associations/crm-associations-overview
-            var dealPath = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/deal";
-
-            var dealResults = new List<AssociationResult>();
-            do
-            {
-                var dealAssociations = _client.ExecuteList<AssociationListHubSpotModel>(string.Format("{0}?limit=100{1}", dealPath, offSet == null ? null : "&offset=" + offSet), convertToPropertiesSchema: false);
-                if (dealAssociations.Results.Any())
-                    dealResults.AddRange(dealAssociations.Results);
-                if (dealAssociations.HasMore)
-                    offSet = dealAssociations.Offset;
-                else
-                    offSet = null;
-            } while (offSet != null);
-            if (dealResults.Any())
-                entity.Associations.AssociatedDeals = dealResults.Select(r => r.ToObjectId.Value).ToArray();
-            else
-                entity.Associations.AssociatedDeals = null;
 
             return entity;
         }

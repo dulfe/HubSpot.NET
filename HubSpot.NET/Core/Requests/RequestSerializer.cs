@@ -76,6 +76,11 @@ namespace HubSpot.NET.Core.Requests
                 {
                     _obj.properties.Id = null;
                 }
+                else if (obj is Api.Ticket.Dto.TicketHubSpotModel)
+                {
+                    _obj.properties.Id = null;
+                    _obj.properties.ObjectId = null;
+                }
             }
 
             return JsonConvert.SerializeObject(
