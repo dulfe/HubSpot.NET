@@ -347,6 +347,58 @@ namespace HubSpot.NET.Tests.Integration
         }
 
         [TestMethod]
+        public void AssociateToDeal_TicketIsAssociatedToDeal()
+        {
+            // Arrange
+            var now = DateTime.Now.ToString("yyMMddHHmmss");
+            var ticketApi = new HubSpotTicketApi(TestSetUp.Client);
+
+            var sampleTicket = new TicketHubSpotModel
+            {
+                Pipeline = "0",
+                Stage = "1",
+                Priority = "HIGH",
+                OwnerId = Convert.ToInt64(TestSetUp.GetAppSetting("HubspotOwner")),
+                Subject = $"Subject {now}",
+                Description = "Description",
+                Category = "PRODUCT_ISSUE"
+            };
+
+            var ticket = ticketApi.Create(sampleTicket);
+
+            var dealApi = new HubSpotDealApi(TestSetUp.Client);
+
+            var sampleDeal = new DealHubSpotModel
+            {
+                Amount = 10000,
+                Name = $"New Created Deal {now}",
+                DateCreated = DateTime.UtcNow
+            };
+
+            var deal = dealApi.Create(sampleDeal);
+
+            // Act
+            ticketApi.AssociateToDeal(ticket, deal.Id.Value);
+
+            var ticketAssociations = ticketApi.GetAssociations(ticket);
+
+            try
+            {
+                // Assert
+                Assert.IsTrue(ticketAssociations.Associations.AssociatedDeals.Any());
+                Assert.IsNull(ticketAssociations.Associations.AssociatedContacts);
+                Assert.IsNull(ticketAssociations.Associations.AssociatedCompany);
+            }
+            finally
+            {
+                // Clean-up
+                ticketApi.Delete(ticket.Id.Value);
+                dealApi.Delete(deal.Id.Value);
+            }
+        }
+
+
+        [TestMethod]
         public void DeleteCompanyAssociation_CompanyAssociationIsDeleted()
         {
             // Arrange

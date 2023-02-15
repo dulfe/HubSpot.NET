@@ -226,14 +226,14 @@
         /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
         /// <param name="entity">The ticket to associate the deal with</param>
         /// <param name="companyId">The Id of the deal to associate the ticket with</param>
-        public T AssociateToDeal<T>(T entity, long dealId) where T : TicketHubSpotModel, new()
+        public T AssociateToDeal<T>(T entity, long dealId, string associationCategory = "HUBSPOT_DEFINED", int associationTypeId = 28) where T : TicketHubSpotModel, new()
         {
             var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/deals/{dealId}";
 
             _client.Execute(path, new List<object> { new
             {
-                associationCategory = "HUBSPOT_DEFINED",
-                associationTypeId = 28
+                associationCategory = associationCategory,
+                associationTypeId = associationTypeId
             }}, method: Method.PUT, convertToPropertiesSchema: true);
             entity.Associations.AssociatedCompany = new[] { dealId };
             return entity;
