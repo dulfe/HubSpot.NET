@@ -220,13 +220,13 @@
             _client.Execute(path, method: Method.DELETE, convertToPropertiesSchema: true);
         }
 
-        /// <summary>
-        /// Associate a deal to a ticket
-        /// </summary>
-        /// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
-        /// <param name="entity">The ticket to associate the deal with</param>
-        /// <param name="companyId">The Id of the deal to associate the ticket with</param>
-        public T AssociateToDeal<T>(T entity, long dealId, string associationCategory = "HUBSPOT_DEFINED", int associationTypeId = 28) where T : TicketHubSpotModel, new()
+		/// <summary>
+		/// Associate a deal to a ticket
+		/// </summary>
+		/// <typeparam name="T">Implementation of <see cref="TicketHubSpotModel"/></typeparam>
+		/// <param name="entity">The ticket to associate the deal with</param>
+		/// <param name="dealId">The Id of the deal to associate the ticket with</param>
+		public T AssociateToDeal<T>(T entity, long dealId, string associationCategory = "HUBSPOT_DEFINED", int associationTypeId = 28) where T : TicketHubSpotModel, new()
         {
             var path = $"https://api.hubapi.com/crm/v4/objects/tickets/{entity.Id}/associations/deals/{dealId}";
 
