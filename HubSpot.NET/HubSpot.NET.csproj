@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net452;net451;netstandard2.0</TargetFrameworks>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Version>1.5</Version>
+		<Version>1.5.2</Version>
 		<Authors>Chinchilla Software Limited</Authors>
 		<Company>Chinchilla Software Limited</Company>
 		<Description>C# .NET Wrapper around the common HubSpot APIs.</Description>
@@ -15,6 +15,14 @@
 		<RepositoryUrl>https://github.com/Chinchilla-Software-Com/HubSpot.NET</RepositoryUrl>
 		<PackageTags>hubspot api wrapper c# contact company deal engagement properties crm</PackageTags>
 		<PackageReleaseNotes>
+			Version 1.5.2
+
+			* Implement Ticket to Deal Associations - community contribution thanks to https://github.com/avalanchis and 
+
+			Version 1.5.1
+
+			* Address an issue with updating Tickets
+
 			Version 1.5.0
 
 			* Implement basic ticket API operations - community contribution thanks to https://github.com/avalanchis
