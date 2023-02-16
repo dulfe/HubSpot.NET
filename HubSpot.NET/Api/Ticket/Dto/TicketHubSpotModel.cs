@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using HubSpot.NET.Core.Attributes;
 using HubSpot.NET.Core.Interfaces;
-using Newtonsoft.Json;
 
 namespace HubSpot.NET.Api.Ticket.Dto
 {
@@ -18,24 +15,12 @@ namespace HubSpot.NET.Api.Ticket.Dto
 
         /// <summary>
         /// Tickets unique Id in HubSpot
-        /// </summary>        
-        [JsonIgnore]
+        /// </summary>
+        [DataMember(Name = "hs_ticket_id")]
         public long? Id { get; set; }
 
-        [DataMember(Name = "hs_ticket_id")]
-        public long IdSetter
-        {
-            set { Id = value; }
-        }
-        
-        [JsonIgnore]
-        public long? ObjectId { get; set; }
-
         [DataMember(Name = "hs_object_id")]
-        public long ObjectIdSetter
-        {
-            set { ObjectId = value; }
-        }
+        public long? ObjectId { get; set; }
 
         [DataMember(Name = "createdate")]
         [LongDate]
