@@ -27,13 +27,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="local.settings.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
-		</None>
 		<None Update="App.config">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Never</CopyToPublishDirectory>
+		</None>
+		<None Update="local.settings.json">
+		  <Generator></Generator>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 

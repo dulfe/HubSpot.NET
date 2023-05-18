@@ -40,7 +40,7 @@ namespace HubSpot.NET.Api.Deal.Dto
         public long? OwnerId { get; set; }
 
         [DataMember(Name = "closedate")]
-        [LongDate]
+        [LongDateTime]
         public DateTime? CloseDate { get; set; }
 
         [DataMember(Name = "amount")]
